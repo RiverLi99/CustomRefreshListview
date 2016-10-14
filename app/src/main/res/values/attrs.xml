@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RefreshListView">
+        <attr name="isFooterEnable" format="boolean" />
+        <attr name="loadMoreText" format="string" />
+        <attr name="loadMoreTextSize" format="dimension" />
+        <attr name="loadMoreTextColor" format="color" />
+        <attr name="loadMoreBarWidth" format="dimension" />
+        <attr name="loadMoreBarHeight" format="dimension" />
+    </declare-styleable>
+</resources>
+

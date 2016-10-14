@@ -1,23 +1,51 @@
 package com.nd.river.customrefreshlistview;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+import com.nd.river.customrefreshlistview.adapter.HrProfileSearchAdapter;
+import com.nd.river.customrefreshlistview.customview.RefreshListView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements RefreshListView.OnRefreshListener {
+
+    private Context mContext;
+    private RefreshListView mRefreshListView;
+
+    private int mDataCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initParams();
+        initViews();
+        initEvents();
+    }
+
+    private void initParams() {
+        mContext = this;
+        mDataCount = 0;
+    }
+
+    private void initViews() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mRefreshListView = (RefreshListView) this.findViewById(R.id.lv_test);
+        HrProfileSearchAdapter adapter = new HrProfileSearchAdapter(mContext, getInitData());
+        mRefreshListView.setAdapter(adapter);
+    }
+
+    private void initEvents() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -26,27 +54,36 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        mRefreshListView.setOnRefreshListener(this);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    private List<Integer> getInitData() {
+        List<Integer> dataList = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            dataList.add(i);
         }
+        return dataList;
+    }
 
-        return super.onOptionsItemSelected(item);
+    private List<Integer> getNewData(List<Integer> dataList) {
+        for (int i = 0; i < 10; i++) {
+            dataList.add(i);
+        }
+        return dataList;
+    }
+
+    @Override
+    public void onLoadingMore() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (mDataCount > 2) {
+            //没有更多数据
+        } else {
+
+        }
     }
 }
