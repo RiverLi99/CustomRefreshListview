@@ -5,6 +5,7 @@
         <attr name="loadMoreText" format="string" />
         <attr name="loadMoreTextSize" format="dimension" />
         <attr name="loadMoreTextColor" format="color" />
+        <attr name="loadMoreBarColor" format="color" />
         <attr name="loadMoreBarWidth" format="dimension" />
         <attr name="loadMoreBarHeight" format="dimension" />
     </declare-styleable>

@@ -56,11 +56,9 @@ public class HrProfileSearchAdapter extends BaseAdapter {
         return convertView;
     }
 
-
-//    public void updateListView(final List<SearchItem> dataList) {
-//        mDataList = dataList;
-//        this.notifyDataSetChanged();
-//    }
+    public List<Integer> getDataList() {
+        return mDataList;
+    }
 
     public class ViewHolder {
 

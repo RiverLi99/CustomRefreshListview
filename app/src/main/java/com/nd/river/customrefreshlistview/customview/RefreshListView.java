@@ -1,6 +1,5 @@
 package com.nd.river.customrefreshlistview.customview;
 
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
@@ -11,7 +10,9 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -22,17 +23,40 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
 
     private Context mContext;
     private View footerView;
+    private BaseAdapter mInnerAdapter;
     private OnRefreshListener mOnRefreshListener;
 
     private boolean isScrollToBottom;
     private boolean isLoadingMore;
     private int firstVisibleItem;
 
+    /**
+     * 设置FootView是否可用
+     */
     private boolean isFooterEnable;
+    /**
+     * 上拉加载提示的文字
+     */
     private String mLoadMoreText;
+    /**
+     * 上拉加载提示的文字大小
+     */
     private float mLoadMoreTextSize;
+    /**
+     * 上拉加载提示的文字颜色
+     */
     private int mLoadMoreTextColor;
+    /**
+     * 上拉加载loading条的颜色
+     */
+    private int mLoadMoreBarColor;
+    /**
+     * 上拉加载loading条的宽度
+     */
     private int mLoadMoreBarWidth;
+    /**
+     * 上拉加载loading条的高度
+     */
     private int mLoadMoreBarHeight;
 
     public RefreshListView(Context context) {
@@ -68,6 +92,8 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
         mLoadMoreTextColor = ta.getColor(R.styleable.RefreshListView_loadMoreTextColor
                 , ContextCompat.getColor(context, R.color.dimGray));
 
+        mLoadMoreBarColor = ta.getColor(R.styleable.RefreshListView_loadMoreBarColor
+                , ContextCompat.getColor(context, R.color.dimGray));
         mLoadMoreBarWidth = (int) ta.getDimension(R.styleable.RefreshListView_loadMoreBarWidth
                 , getResources().getDimension(R.dimen.pb_load_more_size));
         mLoadMoreBarHeight = (int) ta.getDimension(R.styleable.RefreshListView_loadMoreBarHeight
@@ -94,7 +120,7 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
     }
 
     private View customFooterView() {
-        //消除Header,Footer的View.GONE空白问题
+        //增加外层空布局,消除Header,Footer的View.GONE空白问题
         LinearLayout footerLayout = new LinearLayout(mContext);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT
                 , LinearLayout.LayoutParams.MATCH_PARENT);
@@ -108,7 +134,7 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
         loadingBar.setLayoutParams(progressBarParams);
         loadingBar.setIndeterminate(true);
         Drawable drawable = new ProgressBar(mContext).getIndeterminateDrawable().mutate();
-        drawable.setColorFilter(mLoadMoreTextColor, PorterDuff.Mode.SRC_IN);
+        drawable.setColorFilter(mLoadMoreBarColor, PorterDuff.Mode.SRC_IN);
         loadingBar.setIndeterminateDrawable(drawable);
 
         TextView loadingText = new TextView(mContext);
@@ -135,6 +161,7 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
             if (isFooterEnable && isScrollToBottom && !isLoadingMore) {
 
                 isLoadingMore = true;
+                //底部未完全显示,则跳转到最底部
                 this.setSelection(this.getCount() - 1);
 
                 if (mOnRefreshListener != null) {
@@ -184,11 +211,33 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
 
     /**
      * 隐藏脚布局
+     * true true:有新数据,并且还有未加载完的数据
+     * false false:本次网络请求成功,没有更多数据,页面不需要刷新
+     * true false:本次网络请求失败,页面不需要刷新,还有未加载完的数据
+     *
+     * @param isFooterEnable
+     * @param isNotify
      */
-    public void hideFooterView(boolean isFooterEnable) {
+    public void hideFooterView(boolean isFooterEnable, boolean isNotify) {
         isLoadingMore = false;
         footerView.setVisibility(View.GONE);
         this.isFooterEnable = isFooterEnable;
+        //列表项数据有更新
+        if (isNotify) {
+            if (mInnerAdapter != null) {
+                mInnerAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    public void setFooterEnable(boolean footerEnable) {
+        isFooterEnable = footerEnable;
+    }
+
+    @Override
+    public void setAdapter(ListAdapter adapter) {
+        super.setAdapter(adapter);
+        mInnerAdapter = (BaseAdapter) adapter;
     }
 
     public interface OnRefreshListener {
@@ -197,9 +246,5 @@ public class RefreshListView extends ListView implements AbsListView.OnScrollLis
          * 上拉加载更多
          */
         void onLoadingMore();
-    }
-
-    public void setFooterEnable(boolean footerEnable) {
-        isFooterEnable = footerEnable;
     }
 }
